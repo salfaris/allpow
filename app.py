@@ -7,7 +7,7 @@ from load_css import local_css
 # NOTE :- Must be at the top!
 st.set_page_config(
     page_title="All Powerful London Calculator",
-    page_icon="🧮",
+    page_icon="random",
 )
 
 local_css("style.css")
