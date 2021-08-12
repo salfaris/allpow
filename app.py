@@ -12,8 +12,8 @@ st.set_page_config(
 
 local_css("style.css")
 
-HORIZONTAL_LINE = "---"
-BIG_SPACE = "####"
+DIVIDER = "---"
+BIG_VERTICAL_SPACE = "####"
 
 # Description
 st.title("🧮 All Powerful London Calculator")
@@ -27,7 +27,7 @@ with st.container():
                           step=100.0,
                           format="%f")
 
-st.write(BIG_SPACE)
+st.write(BIG_VERTICAL_SPACE)
 
 # Living Costs
 st.subheader("🏃🏻‍♂️ Living Cost") 
@@ -59,8 +59,8 @@ with st.container():
     
     st.markdown(f"Total living cost: *£ {living_cost:.2f}*")
 
-# st.markdown(HORIZONTAL_LINE)
-st.write(BIG_SPACE)
+# st.markdown(DIVIDER)
+st.write(BIG_VERTICAL_SPACE)
 
 # Entertainment
 st.subheader("🎈 Entertainment")
@@ -74,20 +74,41 @@ with st.container():
         step=10.0,
         format="£ %i",
         help="📝 Entertainment can be anything. It definitely include concerts, theatres, Netflix, Spotify, and the like.")
-st.write(BIG_SPACE)
+st.write(BIG_VERTICAL_SPACE)
 
 # Savings estimate
 st.subheader("🏦 Savings")
+
+if 'savings_state_is_pct' not in st.session_state:
+    st.session_state.savings_state_is_pct = True
+
+def switch_savings_state():
+    st.session_state.savings_state_is_pct = not st.session_state.savings_state_is_pct
+
 with st.container():
-    savings_perc = st.slider(
-        label=r"What % of your income would like to save?",
-        min_value=0.0,
-        max_value=40.0,
-        value=10.0,
-        step=5.0,
-        format="%f percent",
-        help="The amount of savings in %")
-    savings = source * (savings_perc/100.0)
+    savings_state_is_pct = st.session_state.savings_state_is_pct
+    
+    if savings_state_is_pct == True:
+        savings_perc = st.slider(
+            label=r"What % of your income would you like to save?",
+            min_value=0.0,
+            max_value=40.0,
+            value=10.0,
+            step=5.0,
+            format="%f percent",
+            help="The amount of savings in %")
+
+        savings = savings_perc/100.0 * source
+        
+        switch_button = st.button("Insert a number instead?", on_click=switch_savings_state)
+    else:
+        savings = st.number_input("How many £ would you like to save?",
+                          value=float(math.floor(0.1*source / 100.0)) * 100.0,
+                          step=100.0,
+                          format="%f")
+        
+        switch_button = st.button("Calculate based on percentage instead?", on_click=switch_savings_state)
+    
     st.markdown(f"Savings amount: *£ {savings:.2f}*")
 
 cost = living_cost + entertainment_cost
@@ -99,7 +120,7 @@ def float_to_money(val: float):
 def float_to_gbp(val: float):
     return f"£ {float_to_money(val)}"
 
-st.markdown(BIG_SPACE)
+st.markdown(BIG_VERTICAL_SPACE)
 st.text("You can find your monthly budget summary at the sidebar.")
 
 # Budget summary
@@ -156,7 +177,7 @@ indicator_text = f'''
 
 st.sidebar.markdown(indicator_text, unsafe_allow_html=True)
 
-st.markdown(HORIZONTAL_LINE)
+st.markdown(DIVIDER)
 st.caption("Developed with ❤️ by Sal Faris")
 
 hide_menu_style = """
