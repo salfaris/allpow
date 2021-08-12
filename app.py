@@ -155,3 +155,14 @@ indicator_text = f'''
 '''
 
 st.sidebar.markdown(indicator_text, unsafe_allow_html=True)
+
+st.markdown(HORIZONTAL_LINE)
+st.caption("Developed with ❤️ by Sal Faris")
+
+hide_menu_style = """
+        <style>
+        #MainMenu {visibility: hidden;}
+                  footer {visibility: hidden;}
+        </style>
+        """
+st.markdown(hide_menu_style, unsafe_allow_html=True)
