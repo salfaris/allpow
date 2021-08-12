@@ -1,11 +1,14 @@
 .highlight {
   border-radius: 0.4rem;
   color: white;
-  padding: 0.5rem;
-  margin-bottom: 1rem;
+  padding-left: 0.7rem;
+  padding-right: 0.7rem;
+  padding-top: 0.3rem;
+  padding-bottom: 0.3rem;
+  /* margin-bottom: 1rem; */
 }
 .bold {
-  padding-left: 1rem;
+  /* padding-left: 1rem; */
   font-weight: 700;
 }
 
@@ -13,12 +16,24 @@
   font-size: xx-large;
 }
 
-.green {
-  background-color: rgb(68, 227, 60);
+.Aplus {
+  background-color: #2dc937;
 }
-.red {
-  background-color: lightcoral;
+.A {
+  background-color: #99c140;
 }
-.blue {
-  background-color: lightblue;
+.B {
+  background-color: #e7b416;
+}
+
+.C {
+  background-color: #db7b2b;
+}
+
+.D {
+  background-color: #cc3232;
+}
+
+.F {
+  background-color: #cc3232;
 }

@@ -102,7 +102,7 @@ def float_to_gbp(val: float):
 st.write(HORIZONTAL_LINE)
 
 # Budget summary
-st.subheader("🤑 Monthly budget summary")
+st.sidebar.subheader("🤑 Monthly budget summary")
 
 def compute_rating():
     levered_bonus = source - (cost + savings) + 0.6*savings
@@ -115,20 +115,27 @@ def compute_rating():
     bi_ratio = levered_bonus_w_punishment / source
         
     rating = None
-    if bi_ratio < 0:
+    color = None
+    if bi_ratio < 0 or leftover < 0:
         rating = "F"
+        color = "F"
     elif bi_ratio > 0 and bi_ratio <= 0.047847:
         rating = "D"
+        color = "D"
     elif bi_ratio > 0.047847 and bi_ratio <= 0.076555:
         rating = "C"
+        color = "C"
     elif bi_ratio > 0.076555 and bi_ratio <= 0.105263:
         rating = "B"
+        color = "B"
     elif bi_ratio > 0.105263 and bi_ratio <= 0.153111:
         rating = "A"
+        color = "A"
     else:
         rating = "A+"
+        color = "Aplus"
     
-    return rating
+    return rating, color
 
 df = pd.DataFrame({
     'Total cost (without savings)': [float_to_money(cost)],
@@ -136,8 +143,9 @@ df = pd.DataFrame({
     'Leftover money': [float_to_money(leftover)],
 })
 
-st.table(df.assign(dummy_col='£').set_index('dummy_col'))
+st.sidebar.table(df.assign(dummy_col='£').set_index('dummy_col').T)
 # st.subheader(f"Budget indicator: {compute_rating()}")
 
-t = "<div>Budget indicator: <span class='indicator highlight green bold'>A+</div>"
-st.markdown(t, unsafe_allow_html=True)
+rating, color = compute_rating()
+indicator_text = f"<div>Budget indicator: <span class='indicator highlight bold {color}'>{rating}</div>"
+st.sidebar.markdown(indicator_text, unsafe_allow_html=True)
