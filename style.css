@@ -1,4 +1,5 @@
 .highlight {
+  text-align: center;
   border-radius: 0.4rem;
   color: white;
   padding-left: 0.7rem;
@@ -13,27 +14,27 @@
 }
 
 .indicator {
-  font-size: xx-large;
+  font-size: larger;
 }
 
-.Aplus {
+.color_Aplus {
   background-color: #2dc937;
 }
-.A {
+.color_A {
   background-color: #99c140;
 }
-.B {
+.color_B {
   background-color: #e7b416;
 }
 
-.C {
+.color_C {
   background-color: #db7b2b;
 }
 
-.D {
+.color_D {
   background-color: #cc3232;
 }
 
-.F {
+.color_F {
   background-color: #cc3232;
 }

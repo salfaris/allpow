@@ -49,7 +49,7 @@ with st.container():
         '🚶🏻‍♂️ Walking': 0.0,
     }
     mode = lc_sub_col[2].selectbox(
-        label="Mode of transport to uni?",
+        label="Main mode of transport to uni?",
         options=[key for key in transport_cost_dict.keys()],
         index=0
     )
@@ -99,7 +99,8 @@ def float_to_money(val: float):
 def float_to_gbp(val: float):
     return f"£ {float_to_money(val)}"
 
-st.write(HORIZONTAL_LINE)
+st.markdown(BIG_SPACE)
+st.text("You can find your monthly budget summary at the sidebar.")
 
 # Budget summary
 st.sidebar.subheader("🤑 Monthly budget summary")
@@ -118,22 +119,22 @@ def compute_rating():
     color = None
     if bi_ratio < 0 or leftover < 0:
         rating = "F"
-        color = "F"
+        color = "color_F"
     elif bi_ratio > 0 and bi_ratio <= 0.047847:
         rating = "D"
-        color = "D"
+        color = "color_D"
     elif bi_ratio > 0.047847 and bi_ratio <= 0.076555:
         rating = "C"
-        color = "C"
+        color = "color_C"
     elif bi_ratio > 0.076555 and bi_ratio <= 0.105263:
         rating = "B"
-        color = "B"
+        color = "color_B"
     elif bi_ratio > 0.105263 and bi_ratio <= 0.153111:
         rating = "A"
-        color = "A"
+        color = "color_A"
     else:
         rating = "A+"
-        color = "Aplus"
+        color = "color_Aplus"
     
     return rating, color
 
@@ -144,8 +145,13 @@ df = pd.DataFrame({
 })
 
 st.sidebar.table(df.assign(dummy_col='£').set_index('dummy_col').T)
-# st.subheader(f"Budget indicator: {compute_rating()}")
 
 rating, color = compute_rating()
-indicator_text = f"<div>Budget indicator: <span class='indicator highlight bold {color}'>{rating}</div>"
+
+indicator_text = f'''
+<div class="highlight {color}">
+    <span class="indicator">budget indicator:</span> <span class="indicator bold">{rating}</span>
+</div>
+'''
+
 st.sidebar.markdown(indicator_text, unsafe_allow_html=True)
