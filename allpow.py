@@ -1,3 +1,5 @@
+import math
+import pandas as pd
 import streamlit as st
 
 # NOTE :- Must be at the top!
@@ -6,11 +8,11 @@ st.set_page_config(
     page_icon="🧮",
 )
 
-HORIZONTAL_LINE = '''---'''
-
+HORIZONTAL_LINE = "---"
+BIG_SPACE = "####"
 # Description
 st.title("🧮 All Powerful London Calculator")
-st.write("This calculator helps you to estimate your monthly budget in London.")
+st.markdown("This calculator helps you to estimate your **monthly budget** in London.")
 
 # Income
 st.subheader("💷 Source")
@@ -20,17 +22,19 @@ with st.container():
                           step=100.0,
                           format="%f")
 
+st.write(BIG_SPACE)
+
 # Living Costs
 st.subheader("🏃🏻‍♂️ Living Cost") 
 with st.container():
-    lc_colx, lc_coly = st.columns([2, 1])
-    rent = lc_colx.number_input("🏠 Rent", value=600.0, step=100.0, format="%f")
-    bills = lc_coly.number_input("🧾 House bills", value=30.0, step=10.0, format="%f")
+    lc_main_col = st.columns([2, 1])
+    rent = lc_main_col[0].number_input("🏠 Rent", value=600.0, step=100.0, format="%f")
+    bills = lc_main_col[1].number_input("🧾 House bills", value=30.0, step=10.0, format="%f")
     
-    lc_col1, lc_col2, lc_col3 = st.columns(3)
+    lc_sub_col = st.columns(3)
     
-    telco = lc_col1.number_input("📱 Telco", value=12.0, step=5.0, format="%f")
-    groceries = lc_col2.number_input("🛒 Groceries", value=50.0, step=10.0, format="%f")
+    telco = lc_sub_col[0].number_input("📱 Telco", value=12.0, step=5.0, format="%f")
+    groceries = lc_sub_col[1].number_input("🛒 Groceries", value=50.0, step=10.0, format="%f")
     
     # Transportation
     transport_cost_dict = {
@@ -39,30 +43,33 @@ with st.container():
         '🚴🏽 Cycling': 60.0,
         '🚶🏻‍♂️ Walking': 0.0,
     }
-    mode = lc_col3.selectbox(
+    mode = lc_sub_col[2].selectbox(
         label="Mode of transport to uni?",
         options=[key for key in transport_cost_dict.keys()],
         index=0
     )
     transport_cost = transport_cost_dict[mode]
     
-    lc_cost = rent + bills + telco + groceries + transport_cost
+    living_cost = rent + bills + telco + groceries + transport_cost
+    
+    st.markdown(f"Total living cost: *£ {living_cost:.2f}*")
 
-st.markdown(HORIZONTAL_LINE)
+# st.markdown(HORIZONTAL_LINE)
+st.write(BIG_SPACE)
 
 # Entertainment
 st.subheader("🎈 Entertainment")
 with st.container():
-    st.text("A concert ticket ranges from £15 to £100 depending on popularity of the artist.")
-    party_cost = st.slider(
+    st.text("💡 Tip: A concert ticket ranges from £15 to £100 depending on popularity of the artist.")
+    entertainment_cost = st.slider(
         label=r"How much do you want to party?",
         min_value=0.0, 
-        max_value=source/3.0, 
+        max_value=float(math.floor(source/3.0 / 100.0)) * 100.0, 
         value=30.0, 
         step=10.0, 
-        format="£ %i", 
-        help="📝 Entertainment can be anything. It definitely include concerts, theatres, subscriptions (e.g. Netflix, Spotify), and the like.")
-
+        format="£ %i",
+        help="📝 Entertainment can be anything. It definitely include concerts, theatres, Netflix, Spotify, and the like.")
+st.write(BIG_SPACE)
 
 # Savings estimate
 st.subheader("🏦 Savings")
@@ -76,9 +83,53 @@ with st.container():
         format="%f percent", 
         help="The amount of savings in %")
     savings = source * (savings_perc/100.0)
+    st.markdown(f"Savings amount: *£ {savings:.2f}*")
 
-# Sidebar
-# st.sidebar.title(f"Account balance: £{source - savings - lc_cost}")
-st.sidebar.text(f"Total monthly cost: £{lc_cost + party_cost}")
-st.sidebar.text(f"Monthly savings: £{savings}")
-st.sidebar.success(f"Budget indicator: A+")
+cost = living_cost + entertainment_cost
+leftover = source - cost - savings
+
+def float_to_money(val: float):
+    return f"{val:.2f}"
+
+def float_to_gbp(val: float):
+    return f"£ {float_to_money(val)}"
+
+st.write(HORIZONTAL_LINE)
+
+# Budget summary
+st.subheader("🤑 Monthly budget summary")
+
+df = pd.DataFrame({
+    'Total cost (without savings)': [float_to_money(cost)],
+    'Total cost (with savings)': [float_to_money(cost + savings)],
+    'Leftover money': [float_to_money(leftover)],
+})
+
+def compute_rating():
+    levered_bonus = source - (cost + savings) + 0.63*savings
+
+    if savings > 0:
+        levered_bonus_w_punishment = levered_bonus - (savings/source)*entertainment_cost
+    else:
+        levered_bonus_w_punishment = levered_bonus - 0.31*entertainment_cost
+
+    bi_ratio = levered_bonus_w_punishment / source
+        
+    rating = None
+    if bi_ratio < 0:
+        rating = "F"
+    elif bi_ratio > 0 and bi_ratio <= 0.047847:
+        rating = "D"
+    elif bi_ratio > 0.047847 and bi_ratio <= 0.076555:
+        rating = "C"
+    elif bi_ratio > 0.076555 and bi_ratio <= 0.105263:
+        rating = "B"
+    elif bi_ratio > 0.105263 and bi_ratio <= 0.153111:
+        rating = "A"
+    else:
+        rating = "A+"
+    
+    return rating
+
+st.table(df.assign(dummy_col='£').set_index('dummy_col'))
+st.subheader(f"Budget indicator: {compute_rating()}")
