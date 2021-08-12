@@ -2,14 +2,19 @@ import math
 import pandas as pd
 import streamlit as st
 
+from load_css import local_css
+
 # NOTE :- Must be at the top!
 st.set_page_config(
     page_title="All Powerful London Calculator",
     page_icon="🧮",
 )
 
+local_css("style.css")
+
 HORIZONTAL_LINE = "---"
 BIG_SPACE = "####"
+
 # Description
 st.title("🧮 All Powerful London Calculator")
 st.markdown("This calculator helps you to estimate your **monthly budget** in London.")
@@ -63,10 +68,10 @@ with st.container():
     st.text("💡 Tip: A concert ticket ranges from £15 to £100 depending on popularity of the artist.")
     entertainment_cost = st.slider(
         label=r"How much do you want to party?",
-        min_value=0.0, 
-        max_value=float(math.floor(source/3.0 / 100.0)) * 100.0, 
-        value=30.0, 
-        step=10.0, 
+        min_value=0.0,
+        max_value=float(math.floor(source/3.0 / 100.0)) * 100.0,
+        value=30.0,
+        step=10.0,
         format="£ %i",
         help="📝 Entertainment can be anything. It definitely include concerts, theatres, Netflix, Spotify, and the like.")
 st.write(BIG_SPACE)
@@ -76,11 +81,11 @@ st.subheader("🏦 Savings")
 with st.container():
     savings_perc = st.slider(
         label=r"What % of your income would like to save?",
-        min_value=0.0, 
-        max_value=40.0, 
-        value=10.0, 
-        step=5.0, 
-        format="%f percent", 
+        min_value=0.0,
+        max_value=40.0,
+        value=10.0,
+        step=5.0,
+        format="%f percent",
         help="The amount of savings in %")
     savings = source * (savings_perc/100.0)
     st.markdown(f"Savings amount: *£ {savings:.2f}*")
@@ -99,19 +104,13 @@ st.write(HORIZONTAL_LINE)
 # Budget summary
 st.subheader("🤑 Monthly budget summary")
 
-df = pd.DataFrame({
-    'Total cost (without savings)': [float_to_money(cost)],
-    'Total cost (with savings)': [float_to_money(cost + savings)],
-    'Leftover money': [float_to_money(leftover)],
-})
-
 def compute_rating():
-    levered_bonus = source - (cost + savings) + 0.63*savings
+    levered_bonus = source - (cost + savings) + 0.6*savings
 
     if savings > 0:
         levered_bonus_w_punishment = levered_bonus - (savings/source)*entertainment_cost
     else:
-        levered_bonus_w_punishment = levered_bonus - 0.31*entertainment_cost
+        levered_bonus_w_punishment = levered_bonus - 0.6*entertainment_cost
 
     bi_ratio = levered_bonus_w_punishment / source
         
@@ -131,5 +130,14 @@ def compute_rating():
     
     return rating
 
+df = pd.DataFrame({
+    'Total cost (without savings)': [float_to_money(cost)],
+    'Total cost (with savings)': [float_to_money(cost + savings)],
+    'Leftover money': [float_to_money(leftover)],
+})
+
 st.table(df.assign(dummy_col='£').set_index('dummy_col'))
-st.subheader(f"Budget indicator: {compute_rating()}")
+# st.subheader(f"Budget indicator: {compute_rating()}")
+
+t = "<div>Budget indicator: <span class='indicator highlight green bold'>A+</div>"
+st.markdown(t, unsafe_allow_html=True)
