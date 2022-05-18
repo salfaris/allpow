@@ -128,14 +128,15 @@ LEFTOVER = SOURCE - COST - SAVINGS
 st.markdown(BIG_VERTICAL_SPACE)
 st.text("You can find your monthly budget summary at the sidebar.")
 
-# Budget summary
+# SIDEBAR <---
 st.sidebar.subheader("🤑 Monthly budget summary")
 
-# Sidebar stuffs below.
 df = pd.DataFrame({
-    'Total cost (without savings)': [float_to_money(COST)],
-    'Total cost (with savings)': [float_to_money(COST + SAVINGS)],
-    'Leftover money': [float_to_money(LEFTOVER)],
+    'Income': [float_to_money(SOURCE)],
+    'Living Cost': [f"({float_to_money(LIVING_COST)})"],
+    'Entertainment': [f"({float_to_money(ENTERTAINMENT_COST)})"],
+    'Savings': [f"({float_to_money(SAVINGS)})"],
+    'Leftover': [float_to_money(LEFTOVER)],
 })
 
 st.sidebar.table(df.assign(dummy_col='£').set_index('dummy_col').T)
@@ -155,9 +156,12 @@ indicator_text = f'''
 '''
 
 st.sidebar.markdown(indicator_text, unsafe_allow_html=True)
+# ---> SIDEBAR
 
+# <--- FOOTER
 st.markdown(DIVIDER)
 st.caption("Developed with ❤️ by Salman Faris")
+# --> FOOTER
 
 hide_menu_style = """
         <style>
