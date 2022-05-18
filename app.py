@@ -3,6 +3,7 @@ import pandas as pd
 import streamlit as st
 
 from load_css import local_css
+from helpers import float_to_money, compute_rating
 
 # NOTE :- Must be at the top!
 st.set_page_config(
@@ -18,12 +19,12 @@ BIG_VERTICAL_SPACE = "####"
 # Description
 st.title("🧮 All Powerful London Calculator")
 st.markdown(
-    "This calculator helps you to estimate your **monthly budget** in London.")
+    "This calculator helps you to estimate your **_monthly budget_** in London.")
 
 # Income
 st.subheader("💷 Source")
 with st.container():
-    SOURCE = st.number_input("Your source of income",
+    SOURCE = st.number_input("Your source of monthly income",
                              value=1045.0,
                              step=100.0,
                              format="%f")
@@ -54,7 +55,7 @@ with st.container():
         '🚶🏻‍♂️ Walking': 0.0,
     }
     mode = lc_sub_col[2].selectbox(
-        label="Main mode of transport to uni?",
+        label="Main mode of transport?",
         options=[key for key in transport_cost_dict.keys()],
         index=0
     )
@@ -124,57 +125,13 @@ with st.container():
 COST = LIVING_COST + ENTERTAINMENT_COST
 LEFTOVER = SOURCE - COST - SAVINGS
 
-
-def float_to_money(val: float):
-    return f"{val:.2f}"
-
-
-def float_to_gbp(val: float):
-    return f"£ {float_to_money(val)}"
-
-
 st.markdown(BIG_VERTICAL_SPACE)
 st.text("You can find your monthly budget summary at the sidebar.")
 
 # Budget summary
 st.sidebar.subheader("🤑 Monthly budget summary")
 
-
-def compute_rating():
-    levered_bonus = SOURCE - (COST + SAVINGS) + 0.6 * SAVINGS
-
-    if SAVINGS > 0:
-        levered_bonus_w_punishment = levered_bonus - \
-            (SAVINGS / SOURCE) * ENTERTAINMENT_COST
-    else:
-        levered_bonus_w_punishment = levered_bonus - 0.6 * ENTERTAINMENT_COST
-
-    bi_ratio = levered_bonus_w_punishment / SOURCE
-
-    rating = None
-    color = None
-    if bi_ratio < 0 or LEFTOVER < 0:
-        rating = "F"
-        color = "color_F"
-    elif bi_ratio > 0 and bi_ratio <= 0.047847:
-        rating = "D"
-        color = "color_D"
-    elif bi_ratio > 0.047847 and bi_ratio <= 0.076555:
-        rating = "C"
-        color = "color_C"
-    elif bi_ratio > 0.076555 and bi_ratio <= 0.105263:
-        rating = "B"
-        color = "color_B"
-    elif bi_ratio > 0.105263 and bi_ratio <= 0.153111:
-        rating = "A"
-        color = "color_A"
-    else:
-        rating = "A+"
-        color = "color_Aplus"
-
-    return rating, color
-
-
+# Sidebar stuffs below.
 df = pd.DataFrame({
     'Total cost (without savings)': [float_to_money(COST)],
     'Total cost (with savings)': [float_to_money(COST + SAVINGS)],
@@ -183,7 +140,13 @@ df = pd.DataFrame({
 
 st.sidebar.table(df.assign(dummy_col='£').set_index('dummy_col').T)
 
-rating, color = compute_rating()
+rating, color = compute_rating(
+    SOURCE,
+    COST,
+    SAVINGS,
+    ENTERTAINMENT_COST,
+    LEFTOVER
+)
 
 indicator_text = f'''
 <div class="highlight {color}">
@@ -194,7 +157,7 @@ indicator_text = f'''
 st.sidebar.markdown(indicator_text, unsafe_allow_html=True)
 
 st.markdown(DIVIDER)
-st.caption("Developed with ❤️ by Sal Faris")
+st.caption("Developed with ❤️ by Salman Faris")
 
 hide_menu_style = """
         <style>
